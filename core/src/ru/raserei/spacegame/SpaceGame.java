@@ -27,7 +27,6 @@ public class SpaceGame extends ApplicationAdapter {
 
 	@Override
 	public void render () {
-
 		float dt = Gdx.graphics.getDeltaTime();
 		update(dt);
 		Gdx.gl.glClearColor(0.1f, 0.15f, 0.2f, 1);
