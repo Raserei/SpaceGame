@@ -31,7 +31,7 @@ public class MenuScreen extends Base2dScreen {
         batch = new SpriteBatch();
         playerShip = new Texture("player_ship.png");
         background = new Texture("bg.jpg");
-        shipPos = new Vector2(0,10);
+        shipPos = new Vector2(30,51);
         shipVelocity = 500f;
         shipDestination = new Vector2(shipPos);
         shipDirection = new Vector2(0,0);
@@ -45,12 +45,12 @@ public class MenuScreen extends Base2dScreen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
         batch.draw(background, 0, 0);
-        batch.draw(playerShip,shipPos.x,shipPos.y);
+        batch.draw(playerShip,shipPos.x-30,shipPos.y-41);
         batch.end();
     }
 
     void update(float dt){
-        if (shipPos.cpy().epsilonEquals(shipDestination,1f)) return;
+        if (shipPos.cpy().epsilonEquals(shipDestination)) return;
         if ((shipDestination.cpy().sub(shipPos)).len() <
                 (shipPos.cpy().add(shipDirection.cpy().scl(shipVelocity)).scl(dt)).len()){
             shipPos=shipDestination;
