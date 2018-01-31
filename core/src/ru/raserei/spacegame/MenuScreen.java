@@ -32,7 +32,7 @@ public class MenuScreen extends Base2dScreen {
         playerShip = new Texture("player_ship.png");
         background = new Texture("bg.jpg");
         shipPos = new Vector2(0,10);
-        shipVelocity = 150f;
+        shipVelocity = 500f;
         shipDestination = new Vector2(shipPos);
         shipDirection = new Vector2(0,0);
     }
@@ -51,8 +51,12 @@ public class MenuScreen extends Base2dScreen {
 
     void update(float dt){
         if (shipPos.cpy().epsilonEquals(shipDestination,1f)) return;
-        shipDirection=shipDestination.cpy().sub(shipPos.cpy()).nor();
-        shipPos.add(shipDirection.cpy().scl(shipVelocity).scl(dt));
+        if ((shipDestination.cpy().sub(shipPos)).len() <
+                (shipPos.cpy().add(shipDirection.cpy().scl(shipVelocity)).scl(dt)).len()){
+            shipPos=shipDestination;
+        }
+        else
+            shipPos.add(shipDirection.cpy().scl(shipVelocity).scl(dt));
     }
 
     @Override
@@ -65,6 +69,7 @@ public class MenuScreen extends Base2dScreen {
 
     public void setShipDestination(Vector2 dest){
         shipDestination = dest;
+        shipDirection=shipDestination.cpy().sub(shipPos.cpy()).nor();
     }
 
     @Override
