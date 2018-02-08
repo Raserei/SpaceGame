@@ -4,22 +4,25 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
+import ru.raserei.spacegame.buttons.Button;
+import ru.raserei.spacegame.buttons.ExitButton;
+import ru.raserei.spacegame.buttons.PlayButton;
 import ru.raserei.spacegame.engine.Base2dScreen;
+import ru.raserei.spacegame.engine.math.Rect;
 
 public class MenuScreen extends Base2dScreen {
-    Space2dGame game;
 
-    private SpriteBatch batch;
-    private Texture background;
-    private Texture playerShip;
-    private float shipVelocity;
-    private Vector2 shipPos;
-    private Vector2 shipDestination;
-    private Vector2 shipDirection;
+    private Texture backgroundTexture;
+    private Background background;
 
+    private Texture startButtonTexture;
+    private Button startButton;
+
+    private Texture exitButtonTexture;
+    private Button exitButton;
 
     public MenuScreen(Game game) {
         super(game);
@@ -28,53 +31,47 @@ public class MenuScreen extends Base2dScreen {
     @Override
     public void show() {
         super.show();
-        batch = new SpriteBatch();
-        playerShip = new Texture("player_ship.png");
-        background = new Texture("bg.jpg");
-        shipPos = new Vector2(30,51);
-        shipVelocity = 500f;
-        shipDestination = new Vector2(shipPos);
-        shipDirection = new Vector2(0,0);
+        backgroundTexture = new Texture("bg.jpg");
+        background = new Background(new TextureRegion(backgroundTexture));
+
+        startButtonTexture = new Texture("startButton.jpg");
+        startButton = new PlayButton(new TextureRegion(startButtonTexture));
+
+        exitButtonTexture = new Texture("exitButton.jpg");
+        exitButton = new ExitButton(new TextureRegion(exitButtonTexture));
+
     }
 
     @Override
-    public void render (float delta) {
+    public void render(float delta) {
         super.render(delta);
-        update(delta);
-        Gdx.gl.glClearColor(0.1f, 0.15f, 0.2f, 1);
+        Gdx.gl.glClearColor(0.7f, 0.3f, 0.7f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
-        batch.draw(background, 0, 0);
-        batch.draw(playerShip,shipPos.x-30,shipPos.y-41);
+        background.draw(batch);
+        startButton.draw(batch);
+        exitButton.draw(batch);
         batch.end();
     }
 
-    void update(float dt){
-        if (shipPos.cpy().epsilonEquals(shipDestination)) return;
-        if ((shipDestination.cpy().sub(shipPos)).len() <
-                (shipPos.cpy().add(shipDirection.cpy().scl(shipVelocity)).scl(dt)).len()){
-            shipPos=shipDestination;
-        }
-        else
-            shipPos.add(shipDirection.cpy().scl(shipVelocity).scl(dt));
+    @Override
+    protected void resize(Rect worldBounds) {
+        super.resize(worldBounds);
+        background.resize(worldBounds);
+        startButton.resize(worldBounds);
+        exitButton.resize(worldBounds);
     }
 
     @Override
-    public void dispose () {
-        batch.dispose();
-        background.dispose();
-        playerShip.dispose();
+    public void dispose() {
+        backgroundTexture.dispose();
+        startButtonTexture.dispose();
+        exitButtonTexture.dispose();
         super.dispose();
     }
 
-    public void setShipDestination(Vector2 dest){
-        shipDestination = dest;
-        shipDirection=shipDestination.cpy().sub(shipPos.cpy()).nor();
-    }
-
     @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        setShipDestination(new Vector2(screenX,Gdx.graphics.getHeight()-screenY));
-        return super.touchDown(screenX,screenY,pointer,button);
+    protected void touchUp(Vector2 touch, int pointer) {
+        super.touchUp(touch, pointer);
     }
 }
