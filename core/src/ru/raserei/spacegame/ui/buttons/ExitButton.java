@@ -1,4 +1,4 @@
-package ru.raserei.spacegame.buttons;
+package ru.raserei.spacegame.ui.buttons;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
