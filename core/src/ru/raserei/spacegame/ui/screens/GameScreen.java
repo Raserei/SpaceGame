@@ -2,30 +2,29 @@ package ru.raserei.spacegame.ui.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import ru.raserei.spacegame.Background;
 import ru.raserei.spacegame.Star;
 import ru.raserei.spacegame.engine.Base2dScreen;
 import ru.raserei.spacegame.engine.math.Rect;
-import ru.raserei.spacegame.ui.buttons.Button;
-import ru.raserei.spacegame.ui.buttons.ExitButton;
-import ru.raserei.spacegame.ui.buttons.PlayButton;
-
-/**
- * Created by Raserei on 11.02.2018.
- */
 
 public class GameScreen extends Base2dScreen {
 
     private Texture backgroundTexture;
     private Background background;
 
-    private Texture starTexture;
     private Star[] stars;
+
+    private TextureAtlas atlas;
+
+    //references
+    private static final String BG_TEXTURE_NAME = "bg.jpg";
+    private static final String  ATLAS_NAME = "mainAtlas.tpack";
+    private static final String  STAR_NAME = "star";
 
     public GameScreen(Game game) {
         super(game);
@@ -34,12 +33,12 @@ public class GameScreen extends Base2dScreen {
     @Override
     public void show() {
         super.show();
-        backgroundTexture = new Texture("bg.jpg");
+        atlas = new TextureAtlas(ATLAS_NAME);
+        backgroundTexture = new Texture(BG_TEXTURE_NAME);
         background = new Background(new TextureRegion(backgroundTexture));
-        starTexture = new Texture("star.png");
         stars = new Star[64];
         for (int i =0; i<64;i++){
-            stars[i]= new Star(new TextureRegion(starTexture));
+            stars[i]= new Star(new TextureRegion(atlas.findRegion(STAR_NAME)));
         }
     }
 
@@ -57,8 +56,8 @@ public class GameScreen extends Base2dScreen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
         background.draw(batch);
-        for (int i = 0; i < stars.length; i++) {
-            stars[i].draw(batch);
+        for (Star star : stars) {
+            star.draw(batch);
         }
         batch.end();
     }
@@ -76,6 +75,6 @@ public class GameScreen extends Base2dScreen {
     public void dispose() {
         super.dispose();
         backgroundTexture.dispose();
-        starTexture.dispose();
+        atlas.dispose();
     }
 }

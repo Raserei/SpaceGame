@@ -1,18 +1,12 @@
 package ru.raserei.spacegame;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
-import java.util.Random;
 
 import ru.raserei.spacegame.engine.Sprite;
 import ru.raserei.spacegame.engine.math.Rect;
 import ru.raserei.spacegame.engine.math.Rnd;
-
-/**
- * Created by Raserei on 09.02.2018.
- */
 
 public class Star extends Sprite {
     private final Vector2 STAR_SPEED;
@@ -22,7 +16,7 @@ public class Star extends Sprite {
         super(region);
         setRight(Rnd.nextFloat(-0.5f, 0.5f));
         setTop(Rnd.nextFloat(-0.5f, 0.5f));
-        setHeightProportion(Rnd.nextFloat(0.01f,0.2f));
+        setHeightProportion(Rnd.nextFloat(0.01f,0.03f));
         STAR_SPEED = new Vector2(0,-0.2f);
     }
 

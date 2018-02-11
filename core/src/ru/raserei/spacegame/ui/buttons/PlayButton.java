@@ -1,23 +1,20 @@
 package ru.raserei.spacegame.ui.buttons;
 
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 
-import ru.raserei.spacegame.ui.screens.MenuScreen;
-
-/**
- * Created by Raserei on 07.02.2018.
- */
+import ru.raserei.spacegame.engine.ActionListener;
+import ru.raserei.spacegame.engine.math.Rect;
+import ru.raserei.spacegame.engine.ui.Button;
 
 public class PlayButton extends Button {
-    public PlayButton(TextureRegion region) {
-        super(region);
-        setHeightProportion(0.1f);
-        setTop(0.2f);
+    private final static float BUTTON_HEIGHT = 0.25f;
+
+    public PlayButton(TextureAtlas atlas, ActionListener actionListener) {
+        super(atlas.findRegion("btPlay"), actionListener, BUTTON_HEIGHT);
     }
 
-    @Override
-    protected void touchDown(Vector2 touch, int pointer) {
-
+    public void resize(Rect worldBounds) {
+        setBottom(worldBounds.getBottom());
+        setLeft(worldBounds.getLeft());
     }
 }
