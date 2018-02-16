@@ -9,8 +9,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 
-import ru.raserei.spacegame.Background;
-import ru.raserei.spacegame.Star;
+import ru.raserei.spacegame.Field.*;
 import ru.raserei.spacegame.engine.ActionListener;
 import ru.raserei.spacegame.ui.buttons.ExitButton;
 import ru.raserei.spacegame.ui.buttons.PlayButton;
@@ -31,8 +30,8 @@ public class MenuScreen extends Base2dScreen implements ActionListener{
     private ExitButton exitButton;
 
     //references
-    private static final String BG_TEXTURE_NAME = "bg.jpg";
-    private static final String  ATLAS_NAME = "menuAtlas.tpack";
+    private static final String BG_TEXTURE_NAME = "textures/bg.png";
+    private static final String  ATLAS_NAME = "./textures/menuAtlas.tpack";
     private static final String  STAR_NAME = "star";
 
 

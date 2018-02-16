@@ -17,8 +17,7 @@ public abstract class SpritePool <T extends Sprite> {
     protected abstract T newObject();
 
     //move (if any) one object from free list or add new one to active list
-    public T
-    obtain(){
+    public T obtain(){
         T object;
         if(freeObjects.isEmpty()){
             object = newObject();
@@ -67,5 +66,9 @@ public abstract class SpritePool <T extends Sprite> {
         for (T o: activeObjects){
             o.resize(worldBounds);
         }
+    }
+
+    public List<T> getActiveObjects(){
+        return activeObjects;
     }
 }
