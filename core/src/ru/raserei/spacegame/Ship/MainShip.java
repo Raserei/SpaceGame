@@ -135,4 +135,12 @@ public class MainShip extends Ship {
     public void shoot() {
         if (isAlive) super.shoot();
     }
+
+    public boolean isBulletCollision(Rect bullet) {
+        return !(bullet.getRight() < getLeft()
+                || bullet.getLeft() > getRight()
+                || bullet.getTop() < getBottom()
+                || bullet.getBottom() > pos.y
+        );
+    }
 }
