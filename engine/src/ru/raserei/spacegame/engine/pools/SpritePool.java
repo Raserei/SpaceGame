@@ -71,4 +71,12 @@ public abstract class SpritePool <T extends Sprite> {
     public List<T> getActiveObjects(){
         return activeObjects;
     }
+
+    public void freeAllActiveObjects (){
+        for (int i = 0; i < activeObjects.size(); i++) {
+            T obj = activeObjects.get(i);
+            free(obj);
+            i--;
+        }
+    }
 }

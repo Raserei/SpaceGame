@@ -46,6 +46,11 @@ public class MainShip extends Ship {
         hp = HP;
     }
 
+    public void restart(){
+        hp = getFullHp();
+        isAlive = true;
+        pos.x = 0.0f;
+    }
 
     @Override
     public void resize(Rect worldBounds) {
@@ -122,8 +127,8 @@ public class MainShip extends Ship {
     public void damage(int damage) {
         super.damage(damage);
         if (hp<=0) {
-            isAlive = false;
             boom();
+            isAlive = false;
         }
     }
 
@@ -142,5 +147,19 @@ public class MainShip extends Ship {
                 || bullet.getTop() < getBottom()
                 || bullet.getBottom() > pos.y
         );
+    }
+
+    public int getHp(){
+        return hp;
+    }
+
+    public int getFullHp(){
+        return HP;
+    }
+
+    public void heal(int healthPoint){
+        hp+=healthPoint;
+        if (hp>HP) hp = HP; //мы веселые индусы,
+                            // мы похожи на арбузы
     }
 }

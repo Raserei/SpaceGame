@@ -31,10 +31,12 @@ public class EnemyShip extends Ship {
     private static final float[] SHIP_HEIGHT_PROPORTION = new float[]{0.1f,0.15f,0.2f};
     private static final int[] SHIP_HP = new int[]{10,20,30};
     private static final int[] BULLET_DAMAGE = new int[]{5,10,15};
+    private static final int[] BOUNTY = new int[]{1,2,5};
   //  private int shipType;
 
 
     private MainShip mainShip;
+    private int bounty;
 
     @Override
     public void update(float delta) {
@@ -55,7 +57,7 @@ public class EnemyShip extends Ship {
         this.mainShip = mainShip;
     }
 
-    public void set(int shipType, TextureRegion[] texture){
+    public void set(int shipType, TextureRegion[] texture, int level){
    //     this.shipType = shipType;
         if (shipType<0||shipType>TYPE_AMOUNT) throw new RuntimeException("Attemp to set invalid ship type");
         velocity = SHIP_SPEEDS[shipType];
@@ -66,8 +68,9 @@ public class EnemyShip extends Ship {
         pos.set(0f,0.8f);
         reloadTimer = BULLET_RELOAD_INTERVAL[shipType];
         reloadInterval = BULLET_RELOAD_INTERVAL[shipType];
-        hp = SHIP_HP[shipType];
-        bulletDamage = BULLET_DAMAGE[shipType];
+        hp = SHIP_HP[shipType]+level*10;
+        bulletDamage = BULLET_DAMAGE[shipType]+level*10;
+        bounty = BOUNTY[shipType];
     }
 
     @Override
@@ -85,5 +88,9 @@ public class EnemyShip extends Ship {
                 || bullet.getBottom() > getTop()
                 || bullet.getTop() < pos.y
         );
+    }
+
+    public int getBounty() {
+        return bounty;
     }
 }

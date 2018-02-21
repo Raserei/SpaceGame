@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Align;
 
 import java.util.List;
 
@@ -21,11 +22,19 @@ import ru.raserei.spacegame.Ship.EnemyShip;
 import ru.raserei.spacegame.Ship.EnemyShipPool;
 import ru.raserei.spacegame.Ship.MainShip;
 import ru.raserei.spacegame.Field.Star;
+import ru.raserei.spacegame.engine.ActionListener;
 import ru.raserei.spacegame.engine.Base2dScreen;
 import ru.raserei.spacegame.engine.Sprite;
+import ru.raserei.spacegame.engine.fonts.Font;
 import ru.raserei.spacegame.engine.math.Rect;
+import ru.raserei.spacegame.ui.GameOverMessage;
+import ru.raserei.spacegame.ui.buttons.StartNewGameButton;
 
-public class GameScreen extends Base2dScreen {
+public class GameScreen extends Base2dScreen implements ActionListener {
+
+
+    private enum State {PLAYING, GAME_OVER};
+    private State state;
 
     private Texture backgroundTexture;
     private Background background;
@@ -40,9 +49,14 @@ public class GameScreen extends Base2dScreen {
     private EnemyEmitter enemyEmitter;
     private ExplosionPool explosionPool;
 
-    private Sprite gameOver;
+    private StringBuilder scoreString;
+    private int score;
+    private int level;
+    private StringBuilder HPString;
+    private StringBuilder levelString;
 
-    private EnemyShip enemyShip;
+    private GameOverMessage gameOverMessage;
+    private StartNewGameButton newGameButton;
 
     //references
     private static final String BG_TEXTURE_NAME = "textures/bg.png";
@@ -53,6 +67,9 @@ public class GameScreen extends Base2dScreen {
     private Sound soundLaser = Gdx.audio.newSound(Gdx.files.internal("sounds/laser.wav"));
     private Sound soundBullet = Gdx.audio.newSound(Gdx.files.internal("sounds/bullet.wav"));
     private Music music  = Gdx.audio.newMusic(Gdx.files.internal("sounds/music.mp3"));
+    private Font font = new Font("fonts/mainFont.fnt", "fonts/mainFont.png");
+
+    private int localLevel;
 
 
 
@@ -61,8 +78,9 @@ public class GameScreen extends Base2dScreen {
     }
 
     @Override
-    public void show() { //дилемма - один раз распарсить весь атлас в регионы тут (возможно, это более оптимально) или пусть каждый объект сам отвечает за свой регион
+    public void show() {
         super.show();
+        state = State.PLAYING;
         atlas = new TextureAtlas(ATLAS_NAME);
         backgroundTexture = new Texture(BG_TEXTURE_NAME);
         background = new Background(new TextureRegion(backgroundTexture));
@@ -75,53 +93,101 @@ public class GameScreen extends Base2dScreen {
             stars[i] = new Star(new TextureRegion(atlas.findRegion(STAR_NAME)));
         }
 
-
         bulletPool = new BulletPool();
         explosionPool = new ExplosionPool(atlas, soundExplosion);
         mainShip = new MainShip(atlas, bulletPool,explosionPool, soundLaser);
         enemyShipPool = new EnemyShipPool(atlas,worldBounds,bulletPool,mainShip,explosionPool, soundBullet);
         enemyEmitter = new EnemyEmitter(worldBounds,enemyShipPool,atlas);
-        gameOver = new Sprite(atlas.findRegion("message_game_over")); //todo: вынести в отдельный класс к UI (message?)
-        gameOver.setHeightProportion(0.03f);
+
+        gameOverMessage = new GameOverMessage(atlas);
+        newGameButton = new StartNewGameButton(atlas,this);
+
+        scoreString = new StringBuilder();
+        HPString = new StringBuilder();
+        levelString = new StringBuilder();
+        this.font.setWordSize(0.025f);
+        startNewGame();
 
     }
+
+    public void printInfo() {
+        scoreString.setLength(0);
+        HPString.setLength(0);
+        levelString.setLength(0);
+        font.draw(batch, scoreString.append("Score:").append(score), worldBounds.getLeft(), worldBounds.getTop());
+        font.draw(batch, HPString.append("HP:").append(mainShip.getHp()).append("/").append(mainShip.getFullHp()), worldBounds.pos.x, worldBounds.getTop(), Align.center);
+        font.draw(batch, levelString.append("Stage:").append(Integer.toString(level)), worldBounds.getRight(), worldBounds.getTop(), Align.right);
+    }
+
+    public void startNewGame(){
+        explosionPool.freeAllActiveObjects();
+        enemyShipPool.freeAllActiveObjects();
+        bulletPool.freeAllActiveObjects();
+
+        level = 1;
+        mainShip.restart();
+        score  = 0;
+        enemyEmitter.setLevel(level);
+        gameOverMessage.restart();
+
+        state = State.PLAYING;
+    }
+
     public void update(float delta){
         for (Star s:stars) {
             s.update(delta);
         }
-        if (mainShip.isAlive()) {
-            mainShip.update(delta);
-            bulletPool.update(delta);
-            enemyEmitter.emitEnemy(delta);
-            enemyShipPool.update(delta);
-            explosionPool.update(delta);
+        explosionPool.update(delta);
+        if (mainShip.isAlive()) state = State.PLAYING;
+        else state = State.GAME_OVER;
+        switch (state) {
+            case PLAYING:
+                mainShip.update(delta);
+                bulletPool.update(delta);
+                enemyEmitter.emitEnemy(delta);
+                enemyShipPool.update(delta);
+                break;
+            case GAME_OVER:
+                gameOverMessage.update(delta);
         }
+
+        enemyEmitter.setLevel(level);
     }
 
     @Override
     public void render(float delta) {
         super.render(delta);
+
         bulletPool.freeAllDestroyedActiveObjects();
         enemyShipPool.freeAllDestroyedActiveObjects();
         explosionPool.freeAllDestroyedActiveObjects();
+
         checkCollisions();
         update(delta);
         Gdx.gl.glClearColor(0.7f, 0.3f, 0.7f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         batch.begin();
+
         background.draw(batch);
         for (Star star : stars) {
             star.draw(batch);
         }
-        if (mainShip.isAlive()){ //todo: добавить драматическую МХАТовскую паузу перед отрисовкой геймовера
+
+        explosionPool.drawActiveObjects(batch);
+        if (state == State.PLAYING){
             mainShip.draw(batch);
             bulletPool.drawActiveObjects(batch);
             enemyShipPool.drawActiveObjects(batch);
-            explosionPool.drawActiveObjects(batch);
         }
-        else gameOver.draw(batch); //todo: dispose пулов объектов, чтоб не жрали ресурс, пока игра висит в геймовере. Переход на другой скрин?
+        else if (explosionPool.getActiveObjects().isEmpty()) {
+            gameOverMessage.draw(batch);
+            newGameButton.draw(batch);
+        }
+        printInfo();
         batch.end();
     }
+
 
     public void checkCollisions() {
         // столкновение кораблей
@@ -133,8 +199,9 @@ public class GameScreen extends Base2dScreen {
             float minDist = enemy.getHalfWidth() + mainShip.getHalfWidth();
             if (enemy.pos.dst2(mainShip.pos) < minDist * minDist) {
                 enemy.setDestroyed(true);
+                if (enemy.isDestroyed()) addScore(enemy.getBounty());
                 enemy.boom();
-                mainShip.damage(enemy.getBulletDamage());
+                mainShip.damage(mainShip.getFullHp()/2);
                 return;
             }
         }
@@ -152,6 +219,7 @@ public class GameScreen extends Base2dScreen {
                 if (enemy.isBulletCollision(bullet)) {
                     enemy.damage(bullet.getDamage());
                     bullet.setDestroyed(true);
+                    if (enemy.isDestroyed()) addScore(enemy.getBounty());
                 }
             }
         }
@@ -168,6 +236,16 @@ public class GameScreen extends Base2dScreen {
         }
     }
 
+    private void addScore (int score){
+         this.score+=score;
+         localLevel = this.score/3+1;
+         if (localLevel>this.level)
+         {
+             this.level=localLevel;
+             mainShip.heal(mainShip.getFullHp());
+         }
+    }
+
     @Override
     protected void resize(Rect worldBounds) {
         super.resize(worldBounds);
@@ -179,6 +257,7 @@ public class GameScreen extends Base2dScreen {
         bulletPool.resize(worldBounds);
         enemyShipPool.resize(worldBounds);
         explosionPool.resize(worldBounds);
+        newGameButton.resize(worldBounds);
     }
 
     @Override
@@ -189,6 +268,11 @@ public class GameScreen extends Base2dScreen {
         bulletPool.dispose();
         enemyShipPool.dispose();
         explosionPool.dispose();
+        soundExplosion.dispose();
+        soundBullet.dispose();
+        soundLaser.dispose();
+        music.dispose();
+        font.dispose();
     }
 
     @Override
@@ -206,10 +290,21 @@ public class GameScreen extends Base2dScreen {
     @Override
     protected void touchDown(Vector2 touch, int pointer) {
         mainShip.touchDown(touch,pointer);
+        newGameButton.touchDown(touch,pointer);
     }
 
     @Override
     protected void touchUp(Vector2 touch, int pointer) {
         mainShip.touchUp(touch,pointer);
+        newGameButton.touchUp(touch,pointer);
+    }
+
+    @Override
+    public void actionPerformed(Object src) {
+        if(src==newGameButton){
+            startNewGame();
+            System.out.println("New game started");
+        }
+        else throw new RuntimeException("unknown src");
     }
 }

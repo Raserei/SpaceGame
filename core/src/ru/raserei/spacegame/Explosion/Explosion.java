@@ -14,7 +14,7 @@ import ru.raserei.spacegame.engine.Sprite;
 
 public class Explosion extends Sprite {
     private Sound sound;
-    private float animateInterval = 0.017f;
+    private float animateInterval = 0.01f;
     private float animateTimer;
 
     public Explosion(TextureRegion region, int rows, int cols, int frames, Sound sound) {

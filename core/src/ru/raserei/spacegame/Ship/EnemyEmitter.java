@@ -20,6 +20,8 @@ public class EnemyEmitter {
     private float generateTimer;
     private float generateInterval = 4f;
 
+    private int level;
+
     private final TextureRegion[][] SHIP_REGIONS = new TextureRegion[3][];
 
     public EnemyEmitter(Rect worldBounds, EnemyShipPool enemyShipPool, TextureAtlas atlas) {
@@ -29,7 +31,13 @@ public class EnemyEmitter {
         this.SHIP_REGIONS[0] = Regions.split(atlas.findRegion("enemy0"),1,2,2);
         this.SHIP_REGIONS[1] = Regions.split(atlas.findRegion("enemy1"),1,2,2);
         this.SHIP_REGIONS[2] = Regions.split(atlas.findRegion("enemy2"),1,2,2);
+        level = 1;
     }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
 
     public void emitEnemy(float delta) {
         generateTimer += delta;
@@ -42,7 +50,7 @@ public class EnemyEmitter {
             if (type<0.7f) shipType = 0;
             else if (type<0.75f) shipType = 1;
             else shipType = 2;
-            enemy.set(shipType,SHIP_REGIONS[shipType]); //todo: вынести типы в какой-нибудь enum и тащить их из него
+            enemy.set(shipType,SHIP_REGIONS[shipType], level); //todo: вынести типы в какой-нибудь enum и тащить их из него
 
             enemy.pos.x = Rnd.nextFloat(worldBounds.getLeft() + enemy.getHalfWidth(), worldBounds.getRight() - enemy.getHalfWidth());
             enemy.setBottom(worldBounds.getTop());
